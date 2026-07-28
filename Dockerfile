@@ -1,4 +1,4 @@
-FROM golang:alpine AS builder
+FROM ubuntu:14.04 AS builder
 WORKDIR /app
 COPY src/main.go .
 RUN go build -o execute-app main.go
