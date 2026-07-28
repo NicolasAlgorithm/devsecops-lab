@@ -28,6 +28,6 @@ jobs:
           format: 'table'
           # CRÍTICO: El pipeline fallará si encuentra vulnerabilidades ALTAS o CRÍTICAS
           exit-code: '1' 
-          ignore-unfixed: true
+          ignore-unfixed: false
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
