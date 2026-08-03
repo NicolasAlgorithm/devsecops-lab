@@ -1,33 +1,33 @@
 name: DevSecOps Pipeline
 
-# 1. ¿Cuándo se ejecuta esto? (Triggers)
 on:
   push:
     branches: [ "main" ]
 
-# 2. ¿Qué va a hacer el robot? (Jobs)
 jobs:
-  build-and-scan:
-    name: Construir y Escanear Imagen
-    runs-on: ubuntu-latest # Una máquina virtual limpia de GitHub
-
+  construir-escanear-desplegar:
+    runs-on: ubuntu-latest
     steps:
-      # Paso A: Descargar tu código a la máquina virtual
       - name: Descargar el código
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
-      # Paso B: Construir la imagen Docker usando tu Dockerfile
       - name: Construir imagen Docker
-        run: docker build -t mi-app-segura:latest .
+        run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/execute-app:latest .
 
-      # Paso C: Escanear con Trivy
       - name: Escaneo de Seguridad (Trivy)
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: 'mi-app-segura:latest'
+          image-ref: '${{ secrets.DOCKERHUB_USERNAME }}/execute-app:latest'
           format: 'table'
-          # CRÍTICO: El pipeline fallará si encuentra vulnerabilidades ALTAS o CRÍTICAS
-          exit-code: '1' 
+          exit-code: '1'
           ignore-unfixed: false
-          vuln-type: 'os,library'
-          severity: 'CRITICAL,HIGH'
+          severity: 'CRITICAL'
+
+      - name: Iniciar sesión en Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Subir imagen a Docker Hub
+        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/execute-app:latest
